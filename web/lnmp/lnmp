@@ -1,0 +1,104 @@
+#!/bin/bash
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
+export PATH
+
+# Check if user is root
+if [ $(id -u) != "0" ]; then
+    echo "Error: You must be root to run this script!"
+    exit 1
+fi
+
+echo "+-------------------------------------------+"
+echo "|   Manager for LNMP, ReWritten by Driver   |"
+echo "+-------------------------------------------+"
+echo "|         https://cloudorz.com              |"
+echo "+-------------------------------------------+"
+
+PHPFPMPIDFILE=/www/server/php/73/var/run/php-fpm.pid
+
+arg1=$1
+arg2=$2
+
+lnmp_start()
+{
+    echo "Starting LNMP..."
+    /etc/init.d/nginx start
+    /etc/init.d/mysqld start
+    /etc/init.d/php-fpm-73 start
+}
+
+lnmp_stop()
+{
+    echo "Stoping LNMP..."
+    /etc/init.d/nginx stop
+    /etc/init.d/mysqld stop
+    /etc/init.d/php-fpm-73 stop
+}
+
+lnmp_reload()
+{
+    echo "Reload LNMP..."
+    /etc/init.d/nginx reload
+    /etc/init.d/mysqld reload
+    /etc/init.d/php-fpm-73 reload
+
+}
+
+lnmp_kill()
+{
+    echo "Kill nginx,php-fpm,mysql process..."
+    killall nginx
+    killall mysqld
+    killall php-fpm
+    echo "done."
+}
+
+lnmp_status()
+{
+    /etc/init.d/nginx status
+    if [ -f $PHPFPMPIDFILE ]; then
+        echo "php-fpm is runing!"
+    else
+        echo "php-fpm is stop!"
+    fi
+    /etc/init.d/mysqld status
+}
+
+
+
+case "${arg1}" in
+    start)
+        lnmp_start
+        ;;
+    stop)
+        lnmp_stop
+        ;;
+    restart)
+        lnmp_stop
+        lnmp_start
+        ;;
+    reload)
+        lnmp_reload
+        ;;
+    kill)
+        lnmp_kill
+        ;;
+    status)
+        lnmp_status
+        ;;
+    nginx)
+        /etc/init.d/nginx ${arg2}
+        ;;
+    mysql)
+        /etc/init.d/mysqld ${arg2}
+        ;;
+    php-fpm)
+        /etc/init.d/php-fpm ${arg2}
+        ;;
+    *)
+        echo "Usage: lnmp {start|stop|reload|restart|kill|status}"
+        echo "Usage: lnmp {nginx|mysql|php-fpm|} {start|stop|reload|restart|kill|status}"
+
+        ;;
+esac
+exit
